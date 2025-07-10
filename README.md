@@ -31,7 +31,7 @@ The project is published as a GitHub release. Backend projects can add the contr
 
 The POC includes sample contracts and JSON schemas for `Category` & `CategoryOption` to start.
 
-## Goals
+# Goals
 Some brief info about the main goals of this setup: 
 - Use tools we already have in our ecosystem [GitHub, Maven, JitPack]
   - from the backend point of view, no new tool/tech is required
