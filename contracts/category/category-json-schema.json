@@ -9,10 +9,7 @@
       "type": "object"
     },
     "aggregationType": {
-      "type": "object"
-    },
-    "allItems": {
-      "type": "boolean"
+      "type": "string"
     },
     "attributeValues": {
       "type": "array"
@@ -44,9 +41,6 @@
     "dimension": {
       "type": "string"
     },
-    "dimensionItemKeywords": {
-      "type": "object"
-    },
     "displayDescription": {
       "type": "string"
     },
@@ -62,23 +56,11 @@
     "favorite": {
       "type": "boolean"
     },
-    "favorites": {
-      "type": "array"
-    },
-    "filter": {
-      "type": "string"
-    },
-    "formName": {
-      "type": "string"
-    },
     "href": {
       "type": "string"
     },
     "id": {
       "type": "string"
-    },
-    "items": {
-      "type": "array"
     },
     "lastUpdated": {
       "type": "string"
@@ -86,23 +68,8 @@
     "lastUpdatedBy": {
       "type": "object"
     },
-    "legendSet": {
-      "type": "object"
-    },
     "name": {
       "type": "string"
-    },
-    "optionSet": {
-      "type": "object"
-    },
-    "program": {
-      "type": "object"
-    },
-    "programStage": {
-      "type": "object"
-    },
-    "repetition": {
-      "type": "object"
     },
     "sharing": {
       "type": "object"
@@ -112,9 +79,6 @@
     },
     "translations": {
       "type": "array"
-    },
-    "valueType": {
-      "type": "object"
     }
   },
   "$schema": "https://json-schema.org/draft/2020-12/schema",
