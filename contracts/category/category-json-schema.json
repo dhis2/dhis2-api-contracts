@@ -2,8 +2,7 @@
   "type": "object",
   "required": [
     "aggregationType",
-    "dataDimensionType",
-    "valueType"
+    "dataDimensionType"
   ],
   "properties": {
     "access": {
