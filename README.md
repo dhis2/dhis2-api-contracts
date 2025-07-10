@@ -33,6 +33,10 @@ The POC includes sample contracts and JSON schemas for `Category` & `CategoryOpt
 
 ## Goals
 Some brief info about the main goals of this setup: 
+- Use tools we already have in our ecosystem [GitHub, Maven, JitPack]
+  - from the backend point of view, no new tool/tech is required
+  - it's free
+  - easily integrated into existing project
 - Enable running tests without requiring network calls
   - Ideally we'd like to run tests without having to make network calls to get the contracts
   - With the GitHub release approach, we can release an artefact and allow dependency management tools to package them in projects, ready to use in tests
