@@ -1,0 +1,7 @@
+{
+  "name": "CategoryOption",
+  "httpMethod": "GET",
+  "requestUrl": "/categoryOptions/{id}",
+  "responseStatus": 200,
+  "jsonSchema": "contracts/category-option/category-option-json-schema.json"
+}

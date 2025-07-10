@@ -1,9 +1,7 @@
 {
   "type": "object",
   "required": [
-    "aggregationType",
-    "dataDimensionType",
-    "valueType"
+    "aggregationType"
   ],
   "properties": {
     "access": {
@@ -12,16 +10,16 @@
     "aggregationType": {
       "type": "object"
     },
-    "allItems": {
-      "type": "boolean"
-    },
     "attributeValues": {
       "type": "array"
     },
-    "categoryCombos": {
+    "categories": {
       "type": "array"
     },
-    "categoryOptions": {
+    "categoryOptionCombos": {
+      "type": "array"
+    },
+    "categoryOptionGroups": {
       "type": "array"
     },
     "code": {
@@ -33,20 +31,11 @@
     "createdBy": {
       "type": "object"
     },
-    "dataDimension": {
-      "type": "boolean"
-    },
-    "dataDimensionType": {
-      "type": "object"
-    },
     "description": {
       "type": "string"
     },
-    "dimension": {
+    "dimensionItem": {
       "type": "string"
-    },
-    "dimensionItemKeywords": {
-      "type": "object"
     },
     "displayDescription": {
       "type": "string"
@@ -60,14 +49,14 @@
     "displayShortName": {
       "type": "string"
     },
+    "endDate": {
+      "type": "string"
+    },
     "favorite": {
       "type": "boolean"
     },
     "favorites": {
       "type": "array"
-    },
-    "filter": {
-      "type": "string"
     },
     "formName": {
       "type": "string"
@@ -78,8 +67,8 @@
     "id": {
       "type": "string"
     },
-    "items": {
-      "type": "array"
+    "isDefault": {
+      "type": "boolean"
     },
     "lastUpdated": {
       "type": "string"
@@ -90,19 +79,16 @@
     "legendSet": {
       "type": "object"
     },
+    "legendSets": {
+      "type": "array"
+    },
     "name": {
       "type": "string"
     },
-    "optionSet": {
-      "type": "object"
+    "organisationUnits": {
+      "type": "array"
     },
-    "program": {
-      "type": "object"
-    },
-    "programStage": {
-      "type": "object"
-    },
-    "repetition": {
+    "queryMods": {
       "type": "object"
     },
     "sharing": {
@@ -111,11 +97,14 @@
     "shortName": {
       "type": "string"
     },
+    "startDate": {
+      "type": "string"
+    },
+    "style": {
+      "type": "object"
+    },
     "translations": {
       "type": "array"
-    },
-    "valueType": {
-      "type": "object"
     }
   },
   "$schema": "https://json-schema.org/draft/2020-12/schema",
