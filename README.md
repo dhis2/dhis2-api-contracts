@@ -18,3 +18,5 @@ The project is published as a GitHub release. Backend projects can add the contr
   <version>3.0.0</version>
 </dependency>
 ```
+
+The POC includes a JSON schema for `Category` to start.
