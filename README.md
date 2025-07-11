@@ -1,6 +1,11 @@
 # dhis2-api-contracts
 
-POC to see how a shared repo, storing API contracts, might look.  
+POC to see how a shared repo for API contracts might look and work.  
+
+## Cycle
+![DHIS2 API Contract Cycle](resources/dhis2-api-contracts.png)
+
+## About
 The project has 3 main directories: 
 - contracts
   - this is where the shared contracts live
@@ -31,9 +36,9 @@ The project is published as a GitHub release. Backend projects can add the contr
 
 The POC includes sample contracts and JSON schemas for `Category` & `CategoryOption` to start.
 
-# Goals
+## Goals
 Some brief info about the main goals of this setup: 
-- Use tools we already have in our ecosystem [GitHub, Maven, JitPack]
+- Use tools we already have in our ecosystem [GitHub, Maven, JitPack, JUnit]
   - from the backend point of view, no new tool/tech is required
   - it's free
   - easily integrated into existing project
