@@ -1,11 +1,11 @@
-name: Trigger PR in dhis2-core with files from PR in dhis2-api-contracts
+name: Trigger PR in dhis2-core with contracts from PR in dhis2-api-contracts
 
 on:
   pull_request:
     types: [opened, synchronize, reopened]
 
 jobs:
-  trigger-pr-with-files:
+  trigger-pr-with-contracts:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout dhis2-api-contracts PR branch
@@ -23,10 +23,7 @@ jobs:
 
       - name: Copy dhis2-api-contracts PR contracts to dhis2-core PR
         run: |
-          echo "Repository root contents:"
-          ls -la
-          
-          # Copy contracts from dhis2-api-contracts to dhis2-core
+          # Copy contracts from dhis2-api-contracts PR to dhis2-core
           cp -r api-contracts/contracts/ dhis2-core/dhis-2/dhis-test-web-api/src/test/resources/contracts/
 
       - name: Create PR in dhis2-core with updated contracts
@@ -40,8 +37,16 @@ jobs:
           git push origin "sync-from-api-contracts-pr-${{ github.event.number }}"
           
           # Create PR using GitHub CLI
-          gh pr create --title "Sync from api-contracts PR ${{ github.event.pull_request.html_url }}" \
-                       --body "Auto-generated from api-contracts PR: ${{ github.event.pull_request.html_url }}" \
+          gh pr create --title "Sync contracts from api-contracts PR ${{ github.event.pull_request.html_url }}" \
+                       --body "Auto-generated from api-contracts PR: ${{ github.event.pull_request.html_url }}
+                              
+                              ## Changes
+                              This PR automatically syncs contract changes from the api-contracts repository.
+                      
+                              ## Review Notes
+                              Please review the contract changes and ensure the the following test passes before merging:
+                              `dhis-test-web-api/src/test/java/org/hisp/dhis/webapi/contract/ApiContractTest.java`" \
+          
                        --head "sync-from-api-contracts-pr-${{ github.event.number }}" \
                        --base master
         env:
