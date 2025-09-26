@@ -2,7 +2,7 @@
 
 POC to see how a shared repo for API contracts might look and work.  
 
-## Cycle
+## Flow
 ![DHIS2 API Contract Cycle](resources/dhis2-api-contracts.png)
 
 ## About

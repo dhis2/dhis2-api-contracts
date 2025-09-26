@@ -24,7 +24,7 @@ jobs:
       - name: Copy dhis2-api-contracts PR contracts to dhis2-core PR
         run: |
           # Copy contracts from dhis2-api-contracts PR to dhis2-core
-          cp -r api-contracts/contracts/ dhis2-core/dhis-2/dhis-test-web-api/src/test/resources/contracts/
+          cp -r api-contracts/contracts/ dhis2-core/dhis-2/dhis-test-web-api/src/test/resources/
 
       - name: Create PR in dhis2-core with updated contracts
         run: |
