@@ -1,5 +1,5 @@
 {
-  "name": "Category",
+  "name": "cgategory",
   "httpMethod": "GET",
   "requestUrl": "/categories/{id}",
   "responseStatus": 200,
