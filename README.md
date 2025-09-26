@@ -6,45 +6,20 @@ POC to see how a shared repo for API contracts might look and work.
 ![DHIS2 API Contract Cycle](resources/dhis2-api-contracts.png)
 
 ## About
-The project has 3 main directories: 
-- contracts
-  - this is where the shared contracts live
-- backend
-  - any backend specific code to be able to retrieve the assets as a dependency
-  - contains a minimal `pom.xml` that includes the root contracts in the packaging of resources
-- frontend
-  - any frontend specific code to be able to retrieve the assets as a dependency (if needed)
-
-The project is published as a GitHub release. Backend projects can add the contracts as a dependency using JitPack. e.g. 
-```xml
-<repositoryies>
-  <repository>
-    <id>jitpack.io</id>
-    <url>https://jitpack.io</url>
-  </repository>
-</repositoryies>
-
-<dependencies>
-  <dependency>
-    <groupId>com.github.david-mackessy</groupId>
-    <artifactId>dhis2-api-contracts</artifactId>
-    <version>3.0.0</version>
-  </dependency>
-</dependencies>
-
-```
+The project has a contracts directory, this is where the shared contracts live. 
+The repo uses a GitHub Action on every pull request, to sync updated contracts to the dhis2-core repo (creating a PR with the updated contracts).
 
 The POC includes sample contracts and JSON schemas for `Category` & `CategoryOption` to start.
 
 ## Goals
 Some brief info about the main goals of this setup: 
-- Use tools we already have in our ecosystem [GitHub, Maven, JitPack, JUnit]
+- Use tools we already have in our ecosystem [GitHub, JUnit]
   - from the backend point of view, no new tool/tech is required
   - it's free
   - easily integrated into existing project
 - Enable running tests without requiring network calls
   - Ideally we'd like to run tests without having to make network calls to get the contracts
-  - With the GitHub release approach, we can release an artefact and allow dependency management tools to package them in projects, ready to use in tests
+  - With the GitHub sync PR approach, we can sync updated contracts to dhis2-core so they are ready to use in tests
 - Defining our own contracts & how they would work best for us
   - We have the flexibility to define what we want
   - Aim to keep them simple while still providing value
