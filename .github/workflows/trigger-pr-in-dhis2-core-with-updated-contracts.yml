@@ -8,10 +8,11 @@ jobs:
   trigger-pr-with-files:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout dhis2-api-contracts PR
+      - name: Checkout dhis2-api-contracts PR branch
         uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
+          path: .
 
       - name: Checkout dhis2-core
         uses: actions/checkout@v4
