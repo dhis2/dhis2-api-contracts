@@ -23,17 +23,6 @@ jobs:
 
       - name: Copy dhis2-api-contracts PR contracts to dhis2-core PR
         run: |
-          echo "Repository root contents:"
-          ls -la
-          
-          # The contracts should be right here since we're in dhis2-api-contracts
-          if [ -d "contracts" ]; then
-          echo "Found contracts directory!"
-          cp -r contracts/ dhis2-core/dhis-2/dhis-test-web-api/src/test/resources/
-          else
-          echo "Contracts directory missing from PR branch!"
-          exit 1
-          fi
           # Copy specific files/directories from dhis2-api-contracts to dhis2-core
           cp -r api-contracts/contracts/ dhis2-core/dhis-2/dhis-test-web-api/src/test/resources/contracts/
 
