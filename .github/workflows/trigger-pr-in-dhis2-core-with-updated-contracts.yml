@@ -1,0 +1,44 @@
+name: Trigger PR in dhis2-core with files from PR in dhis2-api-contracts
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  trigger-pr-with-files:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout dhis2-api-contracts PR
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+
+      - name: Checkout dhis2-core
+        uses: actions/checkout@v4
+        with:
+          repository: dhis2/dhis2-core
+          token: ${{ secrets.DHIS2_BOT_GITHUB_TOKEN }}
+          path: dhis2-core
+
+      - name: Copy dhis2-api-contracts PR contracts to dhis2-core PR
+        run: |
+          # Copy specific files/directories from dhis2-api-contracts to dhis2-core
+          cp contracts dhis-test-web-api/src/test/resources/dhis2-api-contracts/contracts
+
+      - name: Create PR in dhis2-core
+        run: |
+          cd dhis-2-core
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "sync-from-api-contracts-pr-${{ github.event.number }}"
+          git add .
+          git commit -m "Sync from api-contracts PR #${{ github.event.number }}"
+          git push origin "sync-from-api-contracts-pr-${{ github.event.number }}"
+          
+          # Create PR using GitHub CLI
+          gh pr create --title "Sync from api-contracts PR #${{ github.event.number }}" \
+                       --body "Auto-generated from api-contracts PR: ${{ github.event.html_url }}" \
+                       --head "sync-from-api-contracts-pr-${{ github.event.number }}" \
+                       --base master
+        env:
+          GITHUB_TOKEN: ${{ secrets.REPO2_TOKEN }}
