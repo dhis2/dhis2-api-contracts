@@ -39,7 +39,7 @@ jobs:
 
       - name: Create PR in dhis2-core
         run: |
-          cd dhis-2-core
+          cd dhis2-core
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git checkout -b "sync-from-api-contracts-pr-${{ github.event.number }}"
