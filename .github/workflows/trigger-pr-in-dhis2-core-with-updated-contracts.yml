@@ -39,11 +39,11 @@ jobs:
           # Create PR using GitHub CLI
           gh pr create --title "Sync contracts from api-contracts PR ${{ github.event.pull_request.html_url }}" \
                        --body "Auto-generated from api-contracts PR: ${{ github.event.pull_request.html_url }}
-         ## Changes
-         This PR automatically syncs contract changes from the api-contracts repository.
-         ## Review Notes
-         Please review the contract changes and ensure the the following test passes before merging:
-         \`dhis-test-web-api/src/test/java/org/hisp/dhis/webapi/contract/ApiContractTest.java\`" \
+          ## Changes
+          This PR automatically syncs contract changes from the api-contracts repository.
+          ## Review Notes
+          Please review the contract changes and ensure the the following test passes before merging:
+          \`dhis-test-web-api/src/test/java/org/hisp/dhis/webapi/contract/ApiContractTest.java\`" \
                        --head "sync-from-api-contracts-pr-${{ github.event.number }}" \
                        --base master
         env:
