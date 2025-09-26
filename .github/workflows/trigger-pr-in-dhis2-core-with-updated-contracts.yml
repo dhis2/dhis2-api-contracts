@@ -33,17 +33,17 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git checkout -b "sync-from-api-contracts-pr-${{ github.event.number }}"
           git add .
-          git commit -m "Sync from api-contracts PR #${{ github.event.number }}"
+          git commit -m "Sync from api-contracts PR ${{ github.event.pull_request.html_url }}"
           git push origin "sync-from-api-contracts-pr-${{ github.event.number }}"
           
           # Create PR using GitHub CLI
           gh pr create --title "Sync contracts from api-contracts PR ${{ github.event.pull_request.html_url }}" \
                        --body "Auto-generated from api-contracts PR: ${{ github.event.pull_request.html_url }}
-         ## Changes
-         This PR automatically syncs contract changes from the api-contracts repository.
-         ## Review Notes
-         Please review the contract changes and ensure the the following test passes before merging:
-         \`dhis-test-web-api/src/test/java/org/hisp/dhis/webapi/contract/ApiContractTest.java\`" \
+          ## Changes
+          This PR automatically syncs contract changes from the api-contracts repository.
+          ## Review Notes
+          Please review the contract changes and ensure the the following test passes before merging:
+          \`dhis-test-web-api/src/test/java/org/hisp/dhis/webapi/contract/ApiContractTest.java\`" \
                        --head "sync-from-api-contracts-pr-${{ github.event.number }}" \
                        --base master
         env:
