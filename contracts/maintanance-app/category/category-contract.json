@@ -1,7 +1,7 @@
 {
-  "name": "Category",
+  "name": "category",
   "httpMethod": "GET",
   "requestUrl": "/categories/{id}",
   "responseStatus": 200,
-  "jsonSchema": "contracts/category/category-json-schema.json"
+  "jsonSchema": "contracts/maintanance-app/category/category-json-schema.json"
 }
