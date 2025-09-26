@@ -41,4 +41,4 @@ jobs:
                        --head "sync-from-api-contracts-pr-${{ github.event.number }}" \
                        --base master
         env:
-          GITHUB_TOKEN: ${{ secrets.REPO2_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.DHIS2_BOT_GITHUB_TOKEN }}
