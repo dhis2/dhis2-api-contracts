@@ -12,14 +12,14 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
-          path: .
+          path: api-contracts
 
       - name: Checkout dhis2-core
         uses: actions/checkout@v4
         with:
           repository: dhis2/dhis2-core
           token: ${{ secrets.DHIS2_BOT_GITHUB_TOKEN }}
-          path: .
+          path: dhis2-core
 
       - name: Copy dhis2-api-contracts PR contracts to dhis2-core PR
         run: |
@@ -35,7 +35,7 @@ jobs:
           exit 1
           fi
           # Copy specific files/directories from dhis2-api-contracts to dhis2-core
-          cp -r contracts/ dhis-2/dhis-test-web-api/src/test/resources/contracts/
+          cp -r api-contracts/contracts/ dhis2-core/dhis-2/dhis-test-web-api/src/test/resources/contracts/
 
       - name: Create PR in dhis2-core
         run: |
