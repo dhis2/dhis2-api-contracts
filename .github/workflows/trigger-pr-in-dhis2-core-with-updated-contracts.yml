@@ -33,7 +33,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git checkout -b "sync-from-api-contracts-pr-${{ github.event.number }}"
           git add .
-          git commit -m "Sync from api-contracts PR #${{ github.event.number }}"
+          git commit -m "Sync from api-contracts PR ${{ github.event.pull_request.html_url }}"
           git push origin "sync-from-api-contracts-pr-${{ github.event.number }}"
           
           # Create PR using GitHub CLI
