@@ -8,10 +8,11 @@ jobs:
   trigger-pr-with-files:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout dhis2-api-contracts PR
+      - name: Checkout dhis2-api-contracts PR branch
         uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
+          path: api-contracts
 
       - name: Checkout dhis2-core
         uses: actions/checkout@v4
@@ -23,7 +24,7 @@ jobs:
       - name: Copy dhis2-api-contracts PR contracts to dhis2-core PR
         run: |
           # Copy specific files/directories from dhis2-api-contracts to dhis2-core
-          cp contracts dhis-test-web-api/src/test/resources/dhis2-api-contracts/contracts
+          cp -r api-contracts/contracts/ dhis2-core/dhis-2/dhis-test-web-api/src/test/resources/contracts/
 
       - name: Create PR in dhis2-core
         run: |
