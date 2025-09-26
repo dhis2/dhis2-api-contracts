@@ -26,10 +26,10 @@ jobs:
           echo "Repository root contents:"
           ls -la
           
-          # Copy specific files/directories from dhis2-api-contracts to dhis2-core
+          # Copy contracts from dhis2-api-contracts to dhis2-core
           cp -r api-contracts/contracts/ dhis2-core/dhis-2/dhis-test-web-api/src/test/resources/contracts/
 
-      - name: Create PR in dhis2-core
+      - name: Create PR in dhis2-core with updated contracts
         run: |
           cd dhis2-core
           git config user.name "github-actions[bot]"
@@ -40,14 +40,8 @@ jobs:
           git push origin "sync-from-api-contracts-pr-${{ github.event.number }}"
           
           # Create PR using GitHub CLI
-          echo "Event number: ${{ github.event.number }}"
-          echo "Event html_url: ${{ github.event.html_url }}"
-          echo "PR html_url: ${{ github.event.pull_request.html_url }}"
-          echo "Repository: ${{ github.repository }}"
-          echo "PR title: ${{ github.event.pull_request.title }}"
-          
-          gh pr create --title "Sync from api-contracts PR #${{ github.event.number }}" \
-                       --body "Auto-generated from api-contracts PR: ${{ github.event.html_url }}" \
+          gh pr create --title "Sync from api-contracts PR ${{ github.event.pull_request.html_url }}" \
+                       --body "Auto-generated from api-contracts PR: ${{ github.event.pull_request.html_url }}" \
                        --head "sync-from-api-contracts-pr-${{ github.event.number }}" \
                        --base master
         env:
