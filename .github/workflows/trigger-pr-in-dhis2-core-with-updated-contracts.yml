@@ -29,8 +29,8 @@ jobs:
       - name: Create PR in dhis2-core with updated contracts
         run: |
           cd dhis2-core
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "dhis2-bot"
+          git config user.email "apps@dhis2.org"
           git checkout -b "sync-from-api-contracts-pr-${{ github.event.number }}"
           git add .
           git commit -m "Sync from api-contracts PR ${{ github.event.pull_request.html_url }}"
