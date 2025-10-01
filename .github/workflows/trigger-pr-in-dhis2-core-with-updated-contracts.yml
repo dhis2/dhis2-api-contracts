@@ -6,47 +6,66 @@ on:
 
 jobs:
   trigger-pr-with-contracts:
+    env:
+      PR_BRANCH: "sync-from-api-contracts-pr-${{ github.event.number }}"
+      TEMP_PR_BRANCH: "tmp-sync-from-api-contracts-pr-${{ github.event.number }}"
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout dhis2-core to workspace root
+      - name: Checkout dhis2-api-contracts PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          path: api-contracts
+
+      - name: Checkout dhis2-core
         uses: actions/checkout@v4
         with:
           repository: dhis2/dhis2-core
           token: ${{ secrets.DHIS2_BOT_GITHUB_TOKEN }}
+          path: dhis2-core
 
-      - name: Checkout dhis2-api-contracts PR branch to temp directory
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref }}
-          path: temp-api-contracts
-
-      - name: Copy contracts
+      - name: Copy dhis2-api-contracts PR contracts to dhis2-core PR
         run: |
-          # Copy contracts from temp directory
-          cp -r temp-api-contracts/contracts/ dhis-2/dhis-test-web-api/src/test/resources/
-          
-          # Clean up temp directory
-          rm -rf temp-api-contracts
+          # Copy contracts from dhis2-api-contracts PR to dhis2-core
+          cp -r api-contracts/contracts/ dhis2-core/dhis-2/dhis-test-web-api/src/test/resources/
 
-      - name: Create branch and commit with signed commit
+      - name: Create auxiliary branch
+        run: |
+          git checkout -b ${{ env.TEMP_PR_BRANCH }}
+          git push origin ${{ env.TEMP_PR_BRANCH }}
+
+      - name: Commit and Push Changes to auxiliary branch
         uses: flex-development/gh-commit@1.0.0
         with:
-          branch: "sync-from-api-contracts-pr-${{ github.event.number }}"
-          create: true
           message: "Sync from api-contracts PR ${{ github.event.pull_request.html_url }}"
+          ref: ${{ env.TEMP_PR_BRANCH }}
           token: ${{ secrets.DHIS2_BOT_GITHUB_TOKEN }}
+      - name: Create and push release branch
+        run: |
+          git reset --hard
+          git pull origin ${{ env.TEMP_PR_BRANCH }}
+          git checkout -b ${{ env.PR_BRANCH }}
+          git push origin ${{ env.PR_BRANCH }}
+          git push origin --delete ${{ env.TEMP_RELEASE_BRANCH }}
 
-      - name: Create Pull Request
+      - name: Create PR in dhis2-core with updated contracts
+        run: |
+          cd dhis2-core
+          git reset --hard
+          git pull origin ${{ env.TEMP_PR_BRANCH }}
+          git checkout -b ${{ env.PR_BRANCH }}
+          git push origin ${{ env.PR_BRANCH }}
+          git push origin --delete ${{ env.TEMP_PR_BRANCH }}
+          
+          # Create PR using GitHub CLI
+          gh pr create --title "Sync contracts from api-contracts PR ${{ github.event.pull_request.html_url }}" \
+                       --body "Auto-generated from api-contracts PR: ${{ github.event.pull_request.html_url }}
+          ## Changes
+          This PR automatically syncs contract changes from the api-contracts repository.
+          ## Review Notes
+          Please review the contract changes and ensure the the following test passes before merging:
+          \`dhis-test-web-api/src/test/java/org/hisp/dhis/webapi/contract/ApiContractTest.java\`" \
+                       --head "sync-from-api-contracts-pr-${{ github.event.number }}" \
+                       --base master
         env:
           GITHUB_TOKEN: ${{ secrets.DHIS2_BOT_GITHUB_TOKEN }}
-        run: |
-          gh pr create \
-            --title "Sync contracts from api-contracts PR #${{ github.event.number }}" \
-            --body "Auto-generated from api-contracts PR: ${{ github.event.pull_request.html_url }}
-          
-          ## Original PR Details
-          - **Title:** ${{ github.event.pull_request.title }}
-          - **Author:** @${{ github.event.pull_request.user.login }}
-          - **Branch:** \`${{ github.head_ref }}\`" \
-            --head "sync-from-api-contracts-pr-${{ github.event.number }}" \
-            --base master
