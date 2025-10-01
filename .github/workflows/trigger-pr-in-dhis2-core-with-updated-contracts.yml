@@ -21,19 +21,33 @@ jobs:
           token: ${{ secrets.DHIS2_BOT_GITHUB_TOKEN }}
           path: dhis2-core
 
-      - name: Copy dhis2-api-contracts PR contracts to dhis2-core PR
+      - name: Copy contracts to dhis2-core
         run: |
           # Copy contracts from dhis2-api-contracts PR to dhis2-core
           cp -r api-contracts/contracts/ dhis2-core/dhis-2/dhis-test-web-api/src/test/resources/
-          cd dhis2-core
-          git checkout -b "sync-from-api-contracts-pr-${{ github.event.number }}"
-          git push origin "sync-from-api-contracts-pr-${{ github.event.number }}"
 
-      - name: Commit updated contracts
+      - name: Create branch and commit with signed commit
         uses: flex-development/gh-commit@1.0.0
         with:
-          ref: "sync-from-api-contracts-pr-${{ github.event.number }}"
+          cwd: dhis2-core
+          branch: "sync-from-api-contracts-pr-${{ github.event.number }}"
+          create: true
           message: "Sync from api-contracts PR ${{ github.event.pull_request.html_url }}"
           token: ${{ secrets.DHIS2_BOT_GITHUB_TOKEN }}
+
+      - name: Create Pull Request
         env:
           GITHUB_TOKEN: ${{ secrets.DHIS2_BOT_GITHUB_TOKEN }}
+        run: |
+          cd dhis2-core
+          
+          gh pr create \
+            --title "Sync contracts from api-contracts PR #${{ github.event.number }}" \
+            --body "Auto-generated from api-contracts PR: ${{ github.event.pull_request.html_url }}
+          
+          ## Original PR Details
+          - **Title:** ${{ github.event.pull_request.title }}
+          - **Author:** @${{ github.event.pull_request.user.login }}
+          - **Branch:** \`${{ github.head_ref }}\`" \
+            --head "sync-from-api-contracts-pr-${{ github.event.number }}" \
+            --base master
