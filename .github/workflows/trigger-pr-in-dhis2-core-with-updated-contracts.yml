@@ -21,6 +21,17 @@ jobs:
           token: ${{ secrets.DHIS2_BOT_GITHUB_TOKEN }}
           path: dhis2-core
 
+      - name: Show local branches
+        run: |
+          cd dhis2-core
+          git branch
+
+      - name: Show current commit
+        run: |
+          cd dhis2-core
+          git status
+          git rev-parse HEAD
+
       - name: Copy dhis2-api-contracts PR contracts to dhis2-core PR
         run: |
           # Copy contracts from dhis2-api-contracts PR to dhis2-core
@@ -35,6 +46,17 @@ jobs:
           token: ${{ secrets.DHIS2_BOT_GITHUB_TOKEN }}
         env:
           GITHUB_TOKEN: ${{ secrets.DHIS2_BOT_GITHUB_TOKEN }}
+
+      - name: Show local branches
+        run: |
+          cd dhis2-core
+          git branch
+
+      - name: Show current commit
+        run: |
+          cd dhis2-core
+          git status
+          git rev-parse HEAD
 
       - name: Create PR in dhis2-core with updated contracts
         run: |
