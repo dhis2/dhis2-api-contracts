@@ -31,6 +31,7 @@ jobs:
 
       - name: Create auxiliary branch
         run: |
+          cd dhis2-core
           git checkout -b ${{ env.TEMP_PR_BRANCH }}
           git push origin ${{ env.TEMP_PR_BRANCH }}
 
@@ -43,7 +44,6 @@ jobs:
 
       - name: Create PR in dhis2-core with updated contracts
         run: |
-          cd dhis2-core
           git reset --hard
           git pull origin ${{ env.TEMP_PR_BRANCH }}
           git checkout -b ${{ env.PR_BRANCH }}
