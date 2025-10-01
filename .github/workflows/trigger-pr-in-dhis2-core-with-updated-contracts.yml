@@ -33,5 +33,6 @@ jobs:
           ref: "sync-from-api-contracts-pr-${{ github.event.number }}"
           message: "Sync from api-contracts PR ${{ github.event.pull_request.html_url }}"
           token: ${{ secrets.DHIS2_BOT_GITHUB_TOKEN }}
+          path: dhis2-core
         env:
           GITHUB_TOKEN: ${{ secrets.DHIS2_BOT_GITHUB_TOKEN }}
