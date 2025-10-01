@@ -29,31 +29,15 @@ jobs:
           # Copy contracts from dhis2-api-contracts PR to dhis2-core
           cp -r api-contracts/contracts/ dhis2-core/dhis-2/dhis-test-web-api/src/test/resources/
 
-      - name: Create auxiliary branch
-        run: |
-          cd dhis2-core
-          git checkout -b ${{ env.TEMP_PR_BRANCH }}
-          git push origin ${{ env.TEMP_PR_BRANCH }}
-
-      - name: Commit and Push Changes to auxiliary branch
-        uses: flex-development/gh-commit@1.0.0
-        with:
-          message: "Sync from api-contracts PR ${{ github.event.pull_request.html_url }}"
-          ref: ${{ env.TEMP_PR_BRANCH }}
-          token: ${{ secrets.DHIS2_BOT_GITHUB_TOKEN }}
-          repo: 'dhis2-core'
-
       - name: Create PR in dhis2-core with updated contracts
         run: |
-          git reset --hard
-          git pull origin ${{ env.TEMP_PR_BRANCH }}
-          git checkout -b ${{ env.PR_BRANCH }}
-          git push origin ${{ env.PR_BRANCH }}
-          git push origin --delete ${{ env.TEMP_PR_BRANCH }}
-          
-          # Create PR using GitHub CLI
-          gh pr create --title "Sync contracts from api-contracts PR ${{ github.event.pull_request.html_url }}" \
-                       --body "Auto-generated from api-contracts PR: ${{ github.event.pull_request.html_url }}
+          cd dhis2-core
+          npx flex-development/gh-commit \
+          --branch "sync-from-api-contracts-pr-${{ github.event.number }}" \
+          --commit-message "Sync from api-contracts PR ${{ github.event.pull_request.html_url }}" \
+          --pr-title "Sync contracts from api-contracts PR ${{ github.event.pull_request.html_url }}" \
+          --pr-body "Auto-generated from api-contracts PR: ${{ github.event.pull_request.html_url }}
+            
           ## Changes
           This PR automatically syncs contract changes from the api-contracts repository.
           ## Review Notes
