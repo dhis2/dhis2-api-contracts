@@ -12,24 +12,24 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
-          path: api-contracts
+          path: temp-api-contracts
 
-      - name: Checkout dhis2-core
+      - name: Checkout dhis2-core to workspace root
         uses: actions/checkout@v4
         with:
           repository: dhis2/dhis2-core
           token: ${{ secrets.DHIS2_BOT_GITHUB_TOKEN }}
-          path: dhis2-core
+          path: .  # Checkout to root instead of subdirectory
 
-      - name: Copy contracts to dhis2-core
+      - name: Copy contracts
         run: |
-          # Copy contracts from dhis2-api-contracts PR to dhis2-core
-          cp -r api-contracts/contracts/ dhis2-core/dhis-2/dhis-test-web-api/src/test/resources/
+          # Copy contracts from temp directory to current location
+          cp -r temp-api-contracts/contracts/ dhis-2/dhis-test-web-api/src/test/resources/
+          rm -rf temp-api-contracts
 
       - name: Create branch and commit with signed commit
         uses: flex-development/gh-commit@1.0.0
         with:
-          cwd: dhis2-core
           branch: "sync-from-api-contracts-pr-${{ github.event.number }}"
           create: true
           message: "Sync from api-contracts PR ${{ github.event.pull_request.html_url }}"
@@ -39,8 +39,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.DHIS2_BOT_GITHUB_TOKEN }}
         run: |
-          cd dhis2-core
-          
           gh pr create \
             --title "Sync contracts from api-contracts PR #${{ github.event.number }}" \
             --body "Auto-generated from api-contracts PR: ${{ github.event.pull_request.html_url }}
