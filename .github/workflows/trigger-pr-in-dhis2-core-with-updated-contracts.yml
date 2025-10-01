@@ -8,23 +8,24 @@ jobs:
   trigger-pr-with-contracts:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout dhis2-api-contracts PR branch
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref }}
-          path: temp-api-contracts
-
       - name: Checkout dhis2-core to workspace root
         uses: actions/checkout@v4
         with:
           repository: dhis2/dhis2-core
           token: ${{ secrets.DHIS2_BOT_GITHUB_TOKEN }}
-          path: .  # Checkout to root instead of subdirectory
+
+      - name: Checkout dhis2-api-contracts PR branch to temp directory
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          path: temp-api-contracts
 
       - name: Copy contracts
         run: |
-          # Copy contracts from temp directory to current location
+          # Copy contracts from temp directory
           cp -r temp-api-contracts/contracts/ dhis-2/dhis-test-web-api/src/test/resources/
+          
+          # Clean up temp directory
           rm -rf temp-api-contracts
 
       - name: Create branch and commit with signed commit
