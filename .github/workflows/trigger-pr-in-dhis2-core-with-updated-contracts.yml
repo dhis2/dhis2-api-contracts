@@ -22,24 +22,24 @@ jobs:
         with:
           repository: dhis2/dhis2-core
           token: ${{ secrets.DHIS2_BOT_GITHUB_TOKEN }}
-          path: dhis2-core
+          path: .
 
       - name: Copy dhis2-api-contracts PR contracts to dhis2-core PR
         run: |
           # Copy contracts from dhis2-api-contracts PR to dhis2-core
-          cp -r api-contracts/contracts/ dhis2-core/dhis-2/dhis-test-web-api/src/test/resources/
+          cp -r api-contracts/contracts/ dhis-2/dhis-test-web-api/src/test/resources/
 
-      - name: Create auxiliary branch
+      - name: Create branch
         run: |
-          cd dhis2-core
+#          cd dhis2-core
           git checkout -b ${{ env.TEMP_PR_BRANCH }}
           git push origin ${{ env.TEMP_PR_BRANCH }}
 
-      - name: Commit and Push Changes to auxiliary branch
+      - name: Commit and Push Changes to branch
         uses: flex-development/gh-commit@1.0.0
         with:
           message: "Sync from api-contracts PR ${{ github.event.pull_request.html_url }}"
-          ref: "dhis2-core/${{ env.TEMP_PR_BRANCH }}"
+          ref: ${{ env.TEMP_PR_BRANCH }}
           token: ${{ secrets.DHIS2_BOT_GITHUB_TOKEN }}
 
       - name: Create PR in dhis2-core with updated contracts
