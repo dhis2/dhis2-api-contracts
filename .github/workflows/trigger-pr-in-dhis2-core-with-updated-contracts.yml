@@ -14,6 +14,11 @@ jobs:
           ref: ${{ github.head_ref }}
           path: api-contracts
 
+      - name: Check token type
+        run: |
+          curl -H "Authorization: token ${{ secrets.DHIS2_BOT_GITHUB_TOKEN }}" \
+            https://api.github.com/user
+
       - name: Checkout dhis2-core
         uses: actions/checkout@v4
         with:
@@ -29,8 +34,8 @@ jobs:
       - name: Create PR in dhis2-core with updated contracts
         run: |
           cd dhis2-core
-          git config user.name "dhis2-bot"
-          git config user.email "apps@dhis2.org"
+          git config user.name "dhis2-bot[bot]"
+          git config user.email "90051551+dhis2-bot[bot]@dhis2.org"
           git checkout -b "sync-from-api-contracts-pr-${{ github.event.number }}"
           git add .
           git commit -m "Sync from api-contracts PR ${{ github.event.pull_request.html_url }}"
