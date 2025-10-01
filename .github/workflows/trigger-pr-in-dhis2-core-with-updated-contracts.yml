@@ -26,7 +26,6 @@ jobs:
           # Copy contracts from dhis2-api-contracts PR to dhis2-core
           cp -r api-contracts/contracts/ dhis2-core/dhis-2/dhis-test-web-api/src/test/resources/
           cd dhis2-core
-          git checkout -b "sync-from-api-contracts-pr-${{ github.event.number }}"
 
       - name: Commit updated contracts
         uses: flex-development/gh-commit@1.0.0
