@@ -21,22 +21,11 @@ jobs:
           token: ${{ secrets.DHIS2_BOT_GITHUB_TOKEN }}
           path: dhis2-core
 
-      - name: Show local branches
-        run: |
-          cd dhis2-core
-          git branch
-
-      - name: Show current commit
-        run: |
-          cd dhis2-core
-          git status
-          git rev-parse HEAD
-
       - name: Copy dhis2-api-contracts PR contracts to dhis2-core PR
         run: |
           # Copy contracts from dhis2-api-contracts PR to dhis2-core
           cp -r api-contracts/contracts/ dhis2-core/dhis-2/dhis-test-web-api/src/test/resources/
-          cd dhis2-core
+#          cd dhis2-core
 
       - name: Commit updated contracts
         uses: flex-development/gh-commit@1.0.0
@@ -44,35 +33,5 @@ jobs:
           ref: "sync-from-api-contracts-pr-${{ github.event.number }}"
           message: "Sync from api-contracts PR ${{ github.event.pull_request.html_url }}"
           token: ${{ secrets.DHIS2_BOT_GITHUB_TOKEN }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.DHIS2_BOT_GITHUB_TOKEN }}
-
-      - name: Show local branches
-        run: |
-          cd dhis2-core
-          git branch
-
-      - name: Show current commit
-        run: |
-          cd dhis2-core
-          git status
-          git rev-parse HEAD
-
-      - name: Create PR in dhis2-core with updated contracts
-        run: |
-          git add .
-          git commit -m "Sync from api-contracts PR ${{ github.event.pull_request.html_url }}"
-          git push origin "sync-from-api-contracts-pr-${{ github.event.number }}"
-          
-          # Create PR using GitHub CLI
-          gh pr create --title "Sync contracts from api-contracts PR ${{ github.event.pull_request.html_url }}" \
-                       --body "Auto-generated from api-contracts PR: ${{ github.event.pull_request.html_url }}
-          ## Changes
-          This PR automatically syncs contract changes from the api-contracts repository.
-          ## Review Notes
-          Please review the contract changes and ensure the the following test passes before merging:
-          \`dhis-test-web-api/src/test/java/org/hisp/dhis/webapi/contract/ApiContractTest.java\`" \
-                       --head "sync-from-api-contracts-pr-${{ github.event.number }}" \
-                       --base master
         env:
           GITHUB_TOKEN: ${{ secrets.DHIS2_BOT_GITHUB_TOKEN }}
