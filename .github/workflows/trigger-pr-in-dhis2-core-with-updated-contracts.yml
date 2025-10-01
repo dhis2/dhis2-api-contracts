@@ -28,7 +28,7 @@ jobs:
         run: |
           # Copy contracts from dhis2-api-contracts PR to dhis2-core
           ls
-          cp -r api-contracts/contracts/ dhis-2/dhis-test-web-api/src/test/resources/
+          cp -r api-contracts/contracts/ /dhis-2/dhis-test-web-api/src/test/resources/
 
       - name: Create branch
         run: |
