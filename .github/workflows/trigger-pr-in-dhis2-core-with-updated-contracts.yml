@@ -41,6 +41,7 @@ jobs:
           message: "Sync from api-contracts PR ${{ github.event.pull_request.html_url }}"
           ref: ${{ env.TEMP_PR_BRANCH }}
           token: ${{ secrets.DHIS2_BOT_GITHUB_TOKEN }}
+          repo: 'dhis2-core'
 
       - name: Create PR in dhis2-core with updated contracts
         run: |
