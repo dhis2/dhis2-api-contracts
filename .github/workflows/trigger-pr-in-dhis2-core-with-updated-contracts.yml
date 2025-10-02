@@ -6,11 +6,15 @@ on:
 
 jobs:
   trigger-pr-with-contracts:
-    env:
-      PR_BRANCH: "sync-from-api-contracts-pr-${{ github.event.number }}"
-      TEMP_PR_BRANCH: "tmp-sync-from-api-contracts-pr-${{ github.event.number }}"
     runs-on: ubuntu-latest
     steps:
+      - name: Generate GitHub App Token
+        id: generate-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.COMMIT_SIGNING_BOT_APP_ID }}
+          private-key: ${{ secrets.COMMIT_SIGNING_BOT_APP_PRIVATE_KEY }}
+
       - name: Checkout dhis2-api-contracts PR branch
         uses: actions/checkout@v4
         with:
@@ -22,34 +26,27 @@ jobs:
         with:
           repository: dhis2/dhis2-core
           token: ${{ secrets.DHIS2_BOT_GITHUB_TOKEN }}
-          path: .
+          path: dhis2-core
 
       - name: Copy dhis2-api-contracts PR contracts to dhis2-core PR
         run: |
           # Copy contracts from dhis2-api-contracts PR to dhis2-core
-          ls
-          cp -r api-contracts/contracts/ /dhis-2/dhis-test-web-api/src/test/resources/
+          cp -r api-contracts/contracts/ dhis2-core/dhis-2/dhis-test-web-api/src/test/resources/
 
-      - name: Create branch
+      - name: Configure Git to use GitHub App
         run: |
-#          cd dhis2-core
-          git checkout -b ${{ env.TEMP_PR_BRANCH }}
-          git push origin ${{ env.TEMP_PR_BRANCH }}
-
-      - name: Commit and Push Changes to branch
-        uses: flex-development/gh-commit@1.0.0
-        with:
-          message: "Sync from api-contracts PR ${{ github.event.pull_request.html_url }}"
-          ref: ${{ env.TEMP_PR_BRANCH }}
-          token: ${{ secrets.DHIS2_BOT_GITHUB_TOKEN }}
+          git config user.name "test-commit-signing-bot[bot]"
+          git config user.email "88387135+test-commit-signing-bot[bot]@users.noreply.github.com"
 
       - name: Create PR in dhis2-core with updated contracts
         run: |
-          git reset --hard
-          git pull origin ${{ env.TEMP_PR_BRANCH }}
-          git checkout -b ${{ env.PR_BRANCH }}
-          git push origin ${{ env.PR_BRANCH }}
-          git push origin --delete ${{ env.TEMP_PR_BRANCH }}
+          cd dhis2-core
+          git config user.name "dhis2-bot[bot]"
+          git config user.email "90051551+dhis2-bot[bot]@dhis2.org"
+          git checkout -b "sync-from-api-contracts-pr-${{ github.event.number }}"
+          git add .
+          git commit -m "Sync from api-contracts PR ${{ github.event.pull_request.html_url }}"
+          git push origin "sync-from-api-contracts-pr-${{ github.event.number }}"
           
           # Create PR using GitHub CLI
           gh pr create --title "Sync contracts from api-contracts PR ${{ github.event.pull_request.html_url }}" \
@@ -62,4 +59,4 @@ jobs:
                        --head "sync-from-api-contracts-pr-${{ github.event.number }}" \
                        --base master
         env:
-          GITHUB_TOKEN: ${{ secrets.DHIS2_BOT_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
