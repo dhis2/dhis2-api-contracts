@@ -5,80 +5,46 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:
-  trigger-pr-with-contracts:
+  create-core-pr-with-updated-contracts:
     runs-on: ubuntu-latest
     steps:
-      # 1️⃣ Generate GitHub App token
-      - name: Generate GitHub App Token
-        id: generate-token
-        uses: actions/create-github-app-token@v1
-        with:
-          app-id: ${{ secrets.COMMIT_SIGNING_BOT_APP_ID }}
-          private-key: ${{ secrets.COMMIT_SIGNING_BOT_APP_PRIVATE_KEY }}
-
-      # 2️⃣ Checkout the PR branch from dhis2-api-contracts
       - name: Checkout dhis2-api-contracts PR branch
         uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
           path: api-contracts
 
-      # 3️⃣ Checkout dhis2-core using App token (for verified commits)
       - name: Checkout dhis2-core
         uses: actions/checkout@v4
         with:
           repository: dhis2/dhis2-core
-          token: ${{ steps.generate-token.outputs.token }}
+          token: ${{ secrets.DHIS2_BOT_GITHUB_TOKEN }}
           path: dhis2-core
 
-      # 4️⃣ Copy contracts from API PR to core repository
       - name: Copy dhis2-api-contracts PR contracts to dhis2-core PR
         run: |
+          # Copy contracts from dhis2-api-contracts PR to dhis2-core
           cp -r api-contracts/contracts/ dhis2-core/dhis-2/dhis-test-web-api/src/test/resources/
 
-      # 5️⃣ Create branch, commit changes (App-verified), and push
-      - name: Create branch and commit changes (App-verified)
-        run: |
-          cd dhis2-core
-          git config user.name "test-commit-signing-bot[bot]"
-          git config user.email "88387135+test-commit-signing-bot[bot]@users.noreply.github.com"
-
-          git checkout -b "sync-from-api-contracts-pr-${{ github.event.number }}"
-          git add .
-          git commit -m "Sync from api-contracts PR ${{ github.event.pull_request.html_url }}"
-
-          git push --force origin "sync-from-api-contracts-pr-${{ github.event.number }}"
-        env:
-          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
-
-      # 6️⃣ Create PR using dhis2-bot account with verified commit info
-      - name: Create PR in dhis2-core as dhis2-bot
+      - name: Create PR in dhis2-core with updated contracts
         run: |
           cd dhis2-core
           git config user.name "dhis2-bot[bot]"
-          git config user.email "90051551+dhis2-bot[bot]@users.noreply.github.com"
-
-          # Get the latest commit hash for this branch
-          COMMIT_SHA=$(git rev-parse HEAD)
-
-          # Construct PR body with verified commit badge
-          PR_BODY="Auto-generated from api-contracts PR: ${{ github.event.pull_request.html_url }}
-
+          git config user.email "dhis2-bot[bot]@users.noreply.github.com"
+          git checkout -b "sync-from-api-contracts-pr-${{ github.event.number }}"
+          git add .
+          git commit -m "Sync from api-contracts PR ${{ github.event.pull_request.html_url }}"
+          git push origin "sync-from-api-contracts-pr-${{ github.event.number }}"
+          
+          # Create PR using GitHub CLI
+          gh pr create --title "Sync contracts from api-contracts PR ${{ github.event.pull_request.html_url }}" \
+                       --body "Auto-generated from api-contracts PR: ${{ github.event.pull_request.html_url }}
           ## Changes
           This PR automatically syncs contract changes from the api-contracts repository.
-          
-          ## Verified Commit
-          The commit [$COMMIT_SHA](https://github.com/dhis2/dhis2-core/commit/$COMMIT_SHA) is signed and verified by the GitHub App.
-        
           ## Review Notes
-          Please review the contract changes and ensure the following test passes before merging:
-          \`dhis-test-web-api/src/test/java/org/hisp/dhis/webapi/contract/ApiContractTest.java\`"
-  
-          # Create PR using gh CLI
-          gh pr create \
-          --title "Sync contracts from api-contracts PR ${{ github.event.pull_request.html_url }}" \
-          --body "$PR_BODY" \
-          --head "sync-from-api-contracts-pr-${{ github.event.number }}" \
-          --base master
-env:
-  GITHUB_TOKEN: ${{ secrets.DHIS2_BOT_GITHUB_TOKEN }}
+          Please review the contract changes and ensure the the following test passes before merging:
+          \`dhis-test-web-api/src/test/java/org/hisp/dhis/webapi/contract/ApiContractTest.java\`" \
+                       --head "sync-from-api-contracts-pr-${{ github.event.number }}" \
+                       --base master
+        env:
+          GITHUB_TOKEN: ${{ secrets.DHIS2_BOT_GITHUB_TOKEN }}
