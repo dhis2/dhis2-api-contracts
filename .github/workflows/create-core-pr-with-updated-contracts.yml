@@ -5,7 +5,7 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:
-  trigger-pr-with-contracts:
+  create-core-pr-with-updated-contracts:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout dhis2-api-contracts PR branch
@@ -21,7 +21,7 @@ jobs:
           token: ${{ secrets.DHIS2_BOT_GITHUB_TOKEN }}
           path: dhis2-core
 
-      - name: Copy dhis2-api-contracts PR contracts to dhis2-core PR
+      - name: Copy dhis2-api-contracts PR contracts to dhis2-core
         run: |
           # Copy contracts from dhis2-api-contracts PR to dhis2-core
           cp -r api-contracts/contracts/ dhis2-core/dhis-2/dhis-test-web-api/src/test/resources/
@@ -30,7 +30,7 @@ jobs:
         run: |
           cd dhis2-core
           git config user.name "dhis2-bot"
-          git config user.email "apps@dhis2.org"
+          git config user.email "dhis2-bot@users.noreply.github.com"
           git checkout -b "sync-from-api-contracts-pr-${{ github.event.number }}"
           git add .
           git commit -m "Sync from api-contracts PR ${{ github.event.pull_request.html_url }}"
