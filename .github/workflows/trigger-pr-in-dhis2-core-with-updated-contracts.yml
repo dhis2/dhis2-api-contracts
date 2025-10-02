@@ -35,6 +35,7 @@ jobs:
 
       - name: Configure Git to use GitHub App
         run: |
+          cd dhis2-core
           git config user.name "test-commit-signing-bot[bot]"
           git config user.email "88387135+test-commit-signing-bot[bot]@users.noreply.github.com"
 
