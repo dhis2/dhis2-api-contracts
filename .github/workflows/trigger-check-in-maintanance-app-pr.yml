@@ -1,0 +1,19 @@
+name: Trigger dependent workflow on merge
+
+on:
+  pull_request:
+    types:
+      - closed
+
+jobs:
+  trigger:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger dependent workflow in other repo
+        run: |
+          curl -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.CONTRACTS_PAT }}" \
+            https://github.com/dhis2/maintenance-app-betagit add -p /actions/workflows/check-dependent-pr.yml/dispatches \
+            -d '{"ref":"main","inputs":{"job":"check-only"}}'
