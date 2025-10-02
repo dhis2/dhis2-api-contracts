@@ -42,8 +42,6 @@ jobs:
       - name: Create branch
         run: |
           cd dhis2-core
-#          git config user.name "dhis2-bot[bot]"
-#          git config user.email "90051551+dhis2-bot[bot]@dhis2.org"
           git checkout -b "sync-from-api-contracts-pr-${{ github.event.number }}"
           git add .
           git commit -m "Sync from api-contracts PR ${{ github.event.pull_request.html_url }}"
