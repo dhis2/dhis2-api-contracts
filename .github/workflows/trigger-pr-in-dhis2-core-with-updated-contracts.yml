@@ -8,6 +8,13 @@ jobs:
   trigger-pr-with-contracts:
     runs-on: ubuntu-latest
     steps:
+      - name: Generate GitHub App Token
+        id: generate-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.COMMIT_SIGNING_BOT_APP_ID }}
+          private-key: ${{ secrets.COMMIT_SIGNING_BOT_APP_PRIVATE_KEY }}
+
       - name: Checkout dhis2-api-contracts PR branch
         uses: actions/checkout@v4
         with:
@@ -26,15 +33,27 @@ jobs:
           # Copy contracts from dhis2-api-contracts PR to dhis2-core
           cp -r api-contracts/contracts/ dhis2-core/dhis-2/dhis-test-web-api/src/test/resources/
 
+      - name: Configure Git to use GitHub App
+        run: |
+          cd dhis2-core
+          git config user.name "test-commit-signing-bot[bot]"
+          git config user.email "88387135+test-commit-signing-bot[bot]@users.noreply.github.com"
+
+      - name: Create branch
+        run: |
+          cd dhis2-core
+          git checkout -b "sync-from-api-contracts-pr-${{ github.event.number }}"
+          git add .
+          git commit -S -m "Sync from api-contracts PR ${{ github.event.pull_request.html_url }}"
+          git push --force origin "sync-from-api-contracts-pr-${{ github.event.number }}"
+        env:
+          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
+
       - name: Create PR in dhis2-core with updated contracts
         run: |
           cd dhis2-core
-          git config user.name "dhis2-bot"
-          git config user.email "apps@dhis2.org"
-          git checkout -b "sync-from-api-contracts-pr-${{ github.event.number }}"
-          git add .
-          git commit -m "Sync from api-contracts PR ${{ github.event.pull_request.html_url }}"
-          git push origin "sync-from-api-contracts-pr-${{ github.event.number }}"
+          git config user.name "dhis2-bot[bot]"
+          git config user.email "90051551+dhis2-bot[bot]@dhis2.org"
           
           # Create PR using GitHub CLI
           gh pr create --title "Sync contracts from api-contracts PR ${{ github.event.pull_request.html_url }}" \
