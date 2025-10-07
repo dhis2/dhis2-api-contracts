@@ -24,13 +24,18 @@ jobs:
       - name: Import GPG key
         run: |
           echo "${{ secrets.PGP_PRIVATE_KEY }}" | gpg --batch --import
-          # Get the key ID from the imported key
           KEY_ID=$(gpg --list-secret-keys --keyid-format=long | grep -A 1 "sec" | grep -oP '(?<=/)[A-F0-9]+(?= )')
           echo "GPG_KEY_ID=$KEY_ID" >> $GITHUB_ENV
+          
+          # Create GPG wrapper script
+          cat > /tmp/gpg-with-passphrase.sh << 'EOF'
+          #!/bin/bash
+          echo "$PGP_PASSPHRASE" | gpg --batch --pinentry-mode loopback --passphrase-fd 0 "$@"
+          EOF
+          chmod +x /tmp/gpg-with-passphrase.sh
 
       - name: Copy dhis2-api-contracts PR contracts to dhis2-core
         run: |
-          # Copy contracts from dhis2-api-contracts PR to dhis2-core
           cp -r api-contracts/contracts/ dhis2-core/dhis-2/dhis-test-web-api/src/test/resources/
 
       - name: Create PR in dhis2-core with updated contracts
@@ -40,12 +45,12 @@ jobs:
           git config user.email "apps@dhis2.org"
           git config user.signingkey "$GPG_KEY_ID"
           git config commit.gpgsign true
+          git config gpg.program /tmp/gpg-with-passphrase.sh
           git checkout -b "sync-from-api-contracts-pr-${{ github.event.number }}"
           git add .
-          echo "${{ secrets.PGP_PASSPHRASE }}" | git commit --gpg-sign -m "Sync from api-contracts PR ${{ github.event.pull_request.html_url }}"
+          git commit -m "Sync from api-contracts PR ${{ github.event.pull_request.html_url }}"
           git push origin "sync-from-api-contracts-pr-${{ github.event.number }}"
           
-          # Create PR using GitHub CLI
           gh pr create --title "Sync contracts from api-contracts PR ${{ github.event.pull_request.html_url }}" \
                        --body "Auto-generated from api-contracts PR: ${{ github.event.pull_request.html_url }}
           ## Changes
@@ -57,4 +62,4 @@ jobs:
                        --base master
         env:
           GITHUB_TOKEN: ${{ secrets.DHIS2_BOT_GITHUB_TOKEN }}
-          GPG_TTY: $(tty)
+          PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
