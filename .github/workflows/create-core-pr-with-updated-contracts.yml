@@ -23,16 +23,24 @@ jobs:
 
       - name: Import GPG key
         run: |
-          echo "${{ secrets.PGP_PRIVATE_KEY }}" | gpg --batch --import
-          KEY_ID=$(gpg --list-secret-keys --keyid-format=long | grep -A 1 "sec" | grep -oP '(?<=/)[A-F0-9]+(?= )')
-          echo "GPG_KEY_ID=$KEY_ID" >> $GITHUB_ENV
-          
-          # Create GPG wrapper script
-          cat > /tmp/gpg-with-passphrase.sh << 'EOF'
-          #!/bin/bash
-          echo "$PGP_PASSPHRASE" | gpg --batch --pinentry-mode loopback --passphrase-fd 0 "$@"
-          EOF
-          chmod +x /tmp/gpg-with-passphrase.sh
+          echo "${{ secrets.PGP_PRIVATE_KEY }}" > private.key
+          gpg --batch --yes --pinentry-mode loopback \
+              --passphrase "${{ secrets.PGP_PASSPHRASE }}" \
+              --import private.key
+
+      - name: Get GPG key ID
+        id: gpg
+        run: |
+          KEY_ID=$(gpg --list-secret-keys --with-colons | awk -F: '/^sec:/ {print $5; exit}')
+          echo "KEY_ID=$KEY_ID" >> $GITHUB_OUTPUT
+
+      - name: Configure Git for signing
+        run: |
+          git config --global user.name "dhis2-bot"
+          git config --global user.email "apps@dhis2.org"
+          git config --global user.signingkey "${{ steps.gpg.outputs.KEY_ID }}"
+          git config --global gpg.program gpg
+          git config --global commit.gpgsign true
 
       - name: Copy dhis2-api-contracts PR contracts to dhis2-core
         run: |
@@ -41,11 +49,6 @@ jobs:
       - name: Create PR in dhis2-core with updated contracts
         run: |
           cd dhis2-core
-          git config user.name "dhis2-bot"
-          git config user.email "apps@dhis2.org"
-          git config user.signingkey "$GPG_KEY_ID"
-          git config commit.gpgsign true
-          git config gpg.program /tmp/gpg-with-passphrase.sh
           git checkout -b "sync-from-api-contracts-pr-${{ github.event.number }}"
           git add .
           git commit -m "Sync from api-contracts PR ${{ github.event.pull_request.html_url }}"
