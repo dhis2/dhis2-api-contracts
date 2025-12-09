@@ -21,26 +21,43 @@ jobs:
           token: ${{ secrets.DHIS2_BOT_GITHUB_TOKEN }}
           path: dhis2-core
 
-      - name: Import GPG key
+      - name: Install GPG
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gnupg
+
+      - name: Setup GPG for non-interactive use
+        run: |
+          echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
+          echo "use-agent" >> ~/.gnupg/gpg.conf
+          echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
+          gpgconf --kill gpg-agent
+
+      - name: Import private key
         run: |
           echo "${{ secrets.PGP_PRIVATE_KEY }}" > private.key
           gpg --batch --yes --pinentry-mode loopback \
-              --passphrase "${{ secrets.PGP_PASSPHRASE }}" \
-              --import private.key
+            --passphrase "${{ secrets.PGP_PASSPHRASE }}" \
+            --import private.key
 
-      - name: Get GPG key ID
+      - name: Get key ID
         id: gpg
         run: |
           KEY_ID=$(gpg --list-secret-keys --with-colons | awk -F: '/^sec:/ {print $5; exit}')
-          echo "KEY_ID=$KEY_ID" >> $GITHUB_OUTPUT
+          echo "KEY_ID=$KEY_ID" >> "$GITHUB_OUTPUT"
 
-      - name: Configure Git for signing
+      - name: Configure Git
         run: |
+          export GPG_TTY=$(tty)
           git config --global user.name "dhis2-bot"
           git config --global user.email "apps@dhis2.org"
           git config --global user.signingkey "${{ steps.gpg.outputs.KEY_ID }}"
           git config --global gpg.program gpg
           git config --global commit.gpgsign true
+          git config --global gpg.format openpgp
+          git config --global gpg.batch true
+          git config --global gpg.passphrase "${{ secrets.PGP_PASSPHRASE }}"
+          git config --global gpg.program "gpg"
 
       - name: Copy dhis2-api-contracts PR contracts to dhis2-core
         run: |
