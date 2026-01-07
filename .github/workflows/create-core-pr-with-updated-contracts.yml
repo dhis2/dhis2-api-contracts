@@ -1,4 +1,4 @@
-name: Trigger PR in dhis2-core with contracts from PR in dhis2-api-contracts
+name: Create PR in dhis2-core with contracts from PR in dhis2-api-contracts
 
 on:
   pull_request:
@@ -21,18 +21,26 @@ jobs:
           token: ${{ secrets.DHIS2_BOT_GITHUB_TOKEN }}
           path: dhis2-core
 
-      - name: Import GPG key
+      - name: Import GPG private key
         run: |
-          echo "${{ secrets.PGP_PRIVATE_KEY }}" | gpg --batch --import
-          KEY_ID=$(gpg --list-secret-keys --keyid-format=long | grep -A 1 "sec" | grep -oP '(?<=/)[A-F0-9]+(?= )')
-          echo "GPG_KEY_ID=$KEY_ID" >> $GITHUB_ENV
+          # Import key
+          echo "${{ secrets.DHIS2_COMMIT_SIGNING_BOT_PRIVATE_KEY }}" | gpg --batch --import
           
-          # Create GPG wrapper script
-          cat > /tmp/gpg-with-passphrase.sh << 'EOF'
-          #!/bin/bash
-          echo "$PGP_PASSPHRASE" | gpg --batch --pinentry-mode loopback --passphrase-fd 0 "$@"
-          EOF
-          chmod +x /tmp/gpg-with-passphrase.sh
+          # Configure GPG for non-interactive use
+          echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
+          echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
+          gpgconf --kill gpg-agent
+          
+          # Get key ID
+          KEY_ID=$(gpg --list-secret-keys --with-colons | awk -F: '/^sec:/ {print $5; exit}')
+          echo "GPG_KEY_ID=$KEY_ID" >> $GITHUB_ENV
+
+      - name: Configure Git to sign commits
+        run: |
+          git config --global user.name "dhis2-commit-signing-bot"
+          git config --global user.email "dhis2-commit-signing-bot@dhis2.org"
+          git config --global user.signingkey "${{ env.GPG_KEY_ID }}"
+          git config --global commit.gpgsign true
 
       - name: Copy dhis2-api-contracts PR contracts to dhis2-core
         run: |
@@ -41,14 +49,16 @@ jobs:
       - name: Create PR in dhis2-core with updated contracts
         run: |
           cd dhis2-core
-          git config user.name "dhis2-bot"
-          git config user.email "apps@dhis2.org"
-          git config user.signingkey "$GPG_KEY_ID"
-          git config commit.gpgsign true
-          git config gpg.program /tmp/gpg-with-passphrase.sh
           git checkout -b "sync-from-api-contracts-pr-${{ github.event.number }}"
           git add .
-          git commit -m "Sync from api-contracts PR ${{ github.event.pull_request.html_url }}"
+          
+          # Commit with passphrase
+          echo "${{ secrets.DHIS2_COMMIT_SIGNING_BOT_PRIVATE_KEY_PASSPHRASE }}" | gpg --batch --yes \
+            --passphrase-fd 0 \
+            --pinentry-mode loopback \
+            --sign -o /dev/null /dev/null
+          
+          git commit -S -m "Sync from api-contracts PR ${{ github.event.pull_request.html_url }}"
           git push origin "sync-from-api-contracts-pr-${{ github.event.number }}"
           
           gh pr create --title "Sync contracts from api-contracts PR ${{ github.event.pull_request.html_url }}" \
@@ -62,4 +72,3 @@ jobs:
                        --base master
         env:
           GITHUB_TOKEN: ${{ secrets.DHIS2_BOT_GITHUB_TOKEN }}
-          PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
