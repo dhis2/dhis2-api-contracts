@@ -1,9 +1,6 @@
 {
   "type": "object",
   "properties": {
-    "code": {
-      "type": "string"
-    },
     "dataDimensionType": {
       "type": "string",
       "enum": [
