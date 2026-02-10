@@ -36,16 +36,14 @@
           "attribute"
         ],
         "additionalProperties": true
-      },
-      "default": []
+      }
     },
     "dataDimensionType": {
       "type": "string",
       "enum": [
         "DISAGGREGATION",
         "ATTRIBUTE"
-      ],
-      "default": "DISAGGREGATION"
+      ]
     },
     "shortName": {
       "type": "string"
@@ -54,8 +52,7 @@
       "type": "string"
     },
     "dataDimension": {
-      "type": "boolean",
-      "default": true
+      "type": "boolean"
     },
     "categoryOptions": {
       "type": "array",
@@ -73,13 +70,17 @@
           "id"
         ],
         "additionalProperties": true
-      },
-      "default": []
+      }
     }
   },
   "required": [
+    "id",
     "name",
-    "shortName"
+    "attributeValues",
+    "dataDimensionType",
+    "shortName",
+    "dataDimension",
+    "categoryOptions"
   ],
   "additionalProperties": true
 }
