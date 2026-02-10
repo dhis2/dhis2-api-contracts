@@ -74,14 +74,12 @@
         ],
         "additionalProperties": true
       },
-      "minItems": 1,
       "default": []
     }
   },
   "required": [
     "name",
-    "shortName",
-    "categoryOptions"
+    "shortName"
   ],
   "additionalProperties": true
 }
