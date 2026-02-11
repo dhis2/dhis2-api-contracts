@@ -49,8 +49,9 @@ jobs:
       - name: Create PR in dhis2-core with updated contracts
         run: |
           cd dhis2-core
-          git checkout -b "sync-from-api-contracts-pr-${{ github.event.number }}"
-          git add .
+          BR="sync-from-api-contracts-pr-${{ github.event.number }}"
+          git checkout -b "$BR"
+          git add dhis-2/dhis-test-web-api/src/test/resources/contracts
           
           # Commit with passphrase
           echo "${{ secrets.DHIS2_COMMIT_SIGNING_BOT_PRIVATE_KEY_PASSPHRASE }}" | gpg --batch --yes \
@@ -59,7 +60,7 @@ jobs:
             --sign -o /dev/null /dev/null
           
           git commit -S -m "Sync from api-contracts PR ${{ github.event.pull_request.html_url }}"
-          git push origin "sync-from-api-contracts-pr-${{ github.event.number }}"
+          git push --force-with-lease origin "$BR"
           
           gh pr create --title "Sync contracts from api-contracts PR ${{ github.event.pull_request.html_url }}" \
                        --body "Auto-generated from api-contracts PR: ${{ github.event.pull_request.html_url }}
@@ -68,7 +69,7 @@ jobs:
           ## Review Notes
           Please review the contract changes and ensure the the following test passes before merging:
           \`dhis-test-web-api/src/test/java/org/hisp/dhis/webapi/contract/ApiContractTest.java\`" \
-                       --head "sync-from-api-contracts-pr-${{ github.event.number }}" \
+                       --head "$BR" \
                        --base master
         env:
           GITHUB_TOKEN: ${{ secrets.DHIS2_BOT_GITHUB_TOKEN }}
