@@ -8,11 +8,12 @@ jobs:
   create-core-pr-with-updated-contracts:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout dhis2-api-contracts PR branch
+      - name: Checkout dhis2-api-contracts PR head
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.head_ref }}
+          ref: ${{ github.event.pull_request.head.sha }}
           path: api-contracts
+          fetch-depth: 0
 
       - name: Checkout dhis2-core
         uses: actions/checkout@v4
@@ -20,18 +21,16 @@ jobs:
           repository: dhis2/dhis2-core
           token: ${{ secrets.DHIS2_BOT_GITHUB_TOKEN }}
           path: dhis2-core
+          fetch-depth: 0
 
       - name: Import GPG private key
         run: |
-          # Import key
           echo "${{ secrets.DHIS2_COMMIT_SIGNING_BOT_PRIVATE_KEY }}" | gpg --batch --import
-          
-          # Configure GPG for non-interactive use
+          mkdir -p ~/.gnupg
           echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
           echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
           gpgconf --kill gpg-agent
-          
-          # Get key ID
+
           KEY_ID=$(gpg --list-secret-keys --with-colons | awk -F: '/^sec:/ {print $5; exit}')
           echo "GPG_KEY_ID=$KEY_ID" >> $GITHUB_ENV
 
@@ -44,32 +43,55 @@ jobs:
 
       - name: Copy dhis2-api-contracts PR contracts to dhis2-core
         run: |
-          cp -r api-contracts/contracts/ dhis2-core/dhis-2/dhis-test-web-api/src/test/resources/
+          rm -rf dhis2-core/dhis-2/dhis-test-web-api/src/test/resources/contracts
+          cp -r api-contracts/contracts dhis2-core/dhis-2/dhis-test-web-api/src/test/resources/contracts
 
-      - name: Create PR in dhis2-core with updated contracts
+      - name: Create or update PR in dhis2-core with updated contracts
+        env:
+          GITHUB_TOKEN: ${{ secrets.DHIS2_BOT_GITHUB_TOKEN }}
         run: |
           cd dhis2-core
           BR="sync-from-api-contracts-pr-${{ github.event.number }}"
-          git checkout -b "$BR"
+
+          # Ensure we have the latest base + (if exists) remote branch for --force-with-lease
+          git fetch origin master || true
+          git fetch origin "$BR" || true
+
+          # Reset branch from base
+          git checkout -B "$BR" origin/master
+
           git add dhis-2/dhis-test-web-api/src/test/resources/contracts
-          
-          # Commit with passphrase
+
+          # If nothing changed, do nothing (prevents failing commits/PR spam)
+          if git diff --staged --quiet; then
+            echo "No contract changes detected; exiting."
+            exit 0
+          fi
+
+          # Unlock gpg agent (loopback) with passphrase
           echo "${{ secrets.DHIS2_COMMIT_SIGNING_BOT_PRIVATE_KEY_PASSPHRASE }}" | gpg --batch --yes \
             --passphrase-fd 0 \
             --pinentry-mode loopback \
             --sign -o /dev/null /dev/null
-          
+
           git commit -S -m "Sync from api-contracts PR ${{ github.event.pull_request.html_url }}"
           git push --force-with-lease origin "$BR"
-          
-          gh pr create --title "Sync contracts from api-contracts PR ${{ github.event.pull_request.html_url }}" \
-                       --body "Auto-generated from api-contracts PR: ${{ github.event.pull_request.html_url }}
+
+          TITLE="Sync contracts from api-contracts PR ${{ github.event.pull_request.html_url }}"
+          BODY="Auto-generated from api-contracts PR: ${{ github.event.pull_request.html_url }}
           ## Changes
           This PR automatically syncs contract changes from the api-contracts repository.
           ## Review Notes
-          Please review the contract changes and ensure the the following test passes before merging:
-          \`dhis-test-web-api/src/test/java/org/hisp/dhis/webapi/contract/ApiContractTest.java\`" \
-                       --head "$BR" \
-                       --base master
-        env:
-          GITHUB_TOKEN: ${{ secrets.DHIS2_BOT_GITHUB_TOKEN }}
+          Please review the contract changes and ensure the following test passes before merging:
+          \`dhis-test-web-api/src/test/java/org/hisp/dhis/webapi/contract/ApiContractTest.java\`"
+
+          # Create if missing; otherwise update title/body
+          if gh pr view "$BR" --repo dhis2/dhis2-core >/dev/null 2>&1; then
+            gh pr edit "$BR" --repo dhis2/dhis2-core --title "$TITLE" --body "$BODY"
+          else
+            gh pr create --repo dhis2/dhis2-core \
+              --title "$TITLE" \
+              --body "$BODY" \
+              --head "$BR" \
+              --base master
+          fi
