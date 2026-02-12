@@ -3,6 +3,8 @@ name: Create PR in dhis2-core with contracts from PR in dhis2-api-contracts
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+    paths:
+      - "contracts/**"
 
 jobs:
   create-core-pr-with-updated-contracts:
