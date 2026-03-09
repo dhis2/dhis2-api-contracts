@@ -1,0 +1,31 @@
+name: Close dhis2-core PR when contracts PR is closed without merging
+
+on:
+  pull_request:
+    types: [closed]
+    paths:
+      - "contracts/**"
+
+jobs:
+  close-core-pr:
+    if: github.event.pull_request.merged == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Close corresponding PR in dhis2-core
+        env:
+          GITHUB_TOKEN: ${{ secrets.DHIS2_BOT_GITHUB_TOKEN }}
+        run: |
+          BR="sync-from-api-contracts-pr-${{ github.event.number }}"
+
+          PR_NUMBER=$(gh pr view "$BR" --repo dhis2/dhis2-core --json number -q '.number' 2>/dev/null || echo "")
+
+          if [ -z "$PR_NUMBER" ]; then
+            echo "No open PR found in dhis2-core for branch $BR — nothing to close."
+            exit 0
+          fi
+
+          gh pr close "$PR_NUMBER" --repo dhis2/dhis2-core \
+            --comment "Closed automatically: source PR dhis2-api-contracts#${{ github.event.number }} was closed without merging."
+
+          # Delete the branch to keep dhis2-core clean
+          gh api repos/dhis2/dhis2-core/git/refs/heads/$BR -X DELETE || true
