@@ -95,5 +95,6 @@ jobs:
               --title "$TITLE" \
               --body "$BODY" \
               --head "$BR" \
-              --base master
+              --base master \
+              --reviewer dhis2/platform-backend
           fi
