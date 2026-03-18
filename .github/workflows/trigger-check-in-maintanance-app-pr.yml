@@ -15,5 +15,5 @@ jobs:
           curl -X POST \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ secrets.CONTRACTS_PAT }}" \
-            https://github.com/dhis2/maintenance-app-betagit add -p /actions/workflows/check-dependent-pr.yml/dispatches \
+            https://github.com/dhis2/metadata-management-app git add -p /actions/workflows/check-dependent-pr.yml/dispatches \
             -d '{"ref":"main","inputs":{"job":"check-only"}}'
