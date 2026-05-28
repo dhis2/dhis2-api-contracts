@@ -51,6 +51,7 @@ jobs:
       - name: Create or update PR in dhis2-core with updated contracts
         env:
           GITHUB_TOKEN: ${{ secrets.DHIS2_BOT_GITHUB_TOKEN }}
+          PR_BODY: ${{ github.event.pull_request.body }}
         run: |
           cd dhis2-core
           BR="sync-from-api-contracts-pr-${{ github.event.number }}"
@@ -81,6 +82,10 @@ jobs:
 
           TITLE="Sync contracts from api-contracts PR ${{ github.event.pull_request.html_url }}"
           BODY="Auto-generated from api-contracts PR: ${{ github.event.pull_request.html_url }}
+
+          ## Original PR description
+          $PR_BODY
+
           ## Changes
           This PR automatically syncs contract changes from the api-contracts repository.
           ## Review Notes
