@@ -101,5 +101,5 @@ jobs:
               --body "$BODY" \
               --head "$BR" \
               --base master \
-              --reviewer dhis2/platform-backend
+              --reviewer dhis2/team-platform-backend
           fi
