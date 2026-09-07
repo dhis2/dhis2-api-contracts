@@ -11,14 +11,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout dhis2-api-contracts PR head
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           path: api-contracts
           fetch-depth: 0
 
       - name: Checkout dhis2-core
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: dhis2/dhis2-core
           token: ${{ secrets.DHIS2_BOT_GITHUB_TOKEN }}
